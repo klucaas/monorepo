@@ -26,7 +26,7 @@ with DAG(
     dag_id='example_xcom_args',
     start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
     catchup=False,
-    schedule=None,
+    schedule_interval=None,
     tags=['example'],
 ) as dag:
     print_value(generate_value())
