@@ -35,7 +35,7 @@ with DAG(
     "example_xcom_args_with_operators",
     start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
     catchup=False,
-    schedule=None,
+    schedule_interval=None,
     tags=['example'],
 ) as dag2:
     bash_op1 = BashOperator(task_id="c", bash_command="echo c")
