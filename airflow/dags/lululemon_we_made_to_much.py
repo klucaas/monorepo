@@ -6,8 +6,8 @@ import json
 import time
 import random
 
-TWILIO_ACCOUNT = Secret(deploy_type="env", deploy_target=None, secret="airflow-secrets", key="TWILIO_ACCOUNT")
-TWILIO_TOKEN = Secret(deploy_type="env", deploy_target=None, secret="airflow-secrets", key="TWILIO_TOKEN")
+TWILIO_ACCOUNT = Secret(deploy_type="env", deploy_target="TWILIO_ACCOUNT", secret="airflow-secrets", key="TWILIO_ACCOUNT")
+TWILIO_TOKEN = Secret(deploy_type="env", deploy_target="TWILIO_TOKEN", secret="airflow-secrets", key="TWILIO_TOKEN")
 
 
 @dag(schedule_interval="@hourly", start_date=datetime(2022, 9, 9), catchup=False)
