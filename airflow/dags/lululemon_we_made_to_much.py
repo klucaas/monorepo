@@ -21,7 +21,7 @@ def taskflow():
         retries=2,
         multiple_outputs=True,
     )
-    def check_for_belt_bags() -> Dict[str, bool]:
+    def check_for_belt_bags():
         from bs4 import BeautifulSoup
         from collections import Counter
         from typing import Dict
