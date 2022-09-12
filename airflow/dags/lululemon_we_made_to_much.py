@@ -73,13 +73,13 @@ def taskflow():
         return exit_criteria
 
     @task.branch(
-        task_id="branch"
+        task_id="choose_branch"
     )
     def choose_branch():
         return 'send_text_message'
 
     @task.virtualenv(
-        task_id="generate_accessories_dataframe",
+        task_id="send_text_message",
         requirements=["twilio"],
         retries=2
     )
