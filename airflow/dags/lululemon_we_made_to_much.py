@@ -24,6 +24,7 @@ def taskflow():
         from nordvpn_switcher import initialize_VPN, rotate_VPN, terminate_VPN
         import logging
         import requests
+        import json
         from pandas import DataFrame
 
         MINI_BELT_BAG = "Mini Belt Bag"
