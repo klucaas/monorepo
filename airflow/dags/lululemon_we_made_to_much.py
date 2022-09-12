@@ -14,7 +14,7 @@ TWILIO_TOKEN = Secret(deploy_type="env", deploy_target="TWILIO_TOKEN", secret="a
 def taskflow():
 
     @task.virtualenv(
-        task_id="generate_accessories_dataframe",
+        task_id="check_for_belt_bags",
         requirements=["bs4", "nordvpn-switcher", "pandas"],
         retries=2
     )
@@ -95,7 +95,7 @@ def taskflow():
         client = Client(TWILIO_ACCOUNT, TWILIO_TOKEN)
         client.messages.create(body="this is a test message", from_="AIRFLOW", to="15195041469")
 
-    check_for_belt_bags(choose_branch()) #  >> [send_text_message(), skip]
+    check_for_belt_bags() #  >> [send_text_message(), skip]
 
 
 dag = taskflow()
