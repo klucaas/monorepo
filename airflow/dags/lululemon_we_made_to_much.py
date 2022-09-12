@@ -95,8 +95,6 @@ def taskflow():
         client = Client(TWILIO_ACCOUNT, TWILIO_TOKEN)
         client.messages.create(body="this is a test message", from_="AIRFLOW", to="15195041469")
 
-    check_for_belt_bags >> choose_branch >> [send_text_message, skip]
-
     check_for_belt_bags(choose_branch()) >> [send_text_message(), skip]
 
 
