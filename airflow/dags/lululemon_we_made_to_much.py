@@ -1,10 +1,13 @@
 from airflow.decorators import dag, task, virtualenv_task
-from airflow.providers.dingding.operators.dingding import DingdingOperator
+from airflow.kubernetes.secret import Secret
 from datetime import datetime
 import requests
 import json
 import time
 import random
+
+TWILIO_ACCOUNT = Secret(deploy_type="env", secret="airflow-secrets", key="TWILIO_ACCOUNT")
+TWILIO_TOKEN = Secret(deploy_type="env", secret="airflow-secrets", key="TWILIO_TOKEN")
 
 
 @dag(schedule_interval="@hourly", start_date=datetime(2022, 9, 9), catchup=False)
@@ -75,20 +78,17 @@ def taskflow():
     def choose_branch():
         return 'send_text_message'
 
-    send_text_message = DingdingOperator(
-        task_id="send_text_message",
-        dingding_conn_id="dingding_default",
-        message_type="markdown",
-        message={
-            'title': 'Airflow dingding markdown message',
-            'text': '# Markdown message title\n'
-                    'content content .. \n'
-                    '### sub-title\n'
-                    '![logo](http://airflow.apache.org/_images/pin_large.png)'
-        },
-        at_mobiles=['15195041469'],
-        at_all=False,
+    @task.virtualenv(
+        task_id="generate_accessories_dataframe",
+        requirements=["twilio"],
+        retries=2
     )
+    def send_text_message():
+        from twilio.rest import Client
+
+        client = Client(TWILIO_ACCOUNT, TWILIO_TOKEN)
+        client.messages.create(body="this is a test message", from_="AIRFLOW", to="15195041469")
+
     check_for_belt_bags >> choose_branch >> send_text_message
 
 
