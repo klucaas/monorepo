@@ -24,6 +24,7 @@ def taskflow():
     def check_for_belt_bags() -> Dict[str, bool]:
         from bs4 import BeautifulSoup
         from collections import Counter
+        from typing import Dict
         from nordvpn_switcher import initialize_VPN, rotate_VPN, terminate_VPN
         import logging
         import requests
