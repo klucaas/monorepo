@@ -13,7 +13,7 @@ TWILIO_TOKEN = Secret(deploy_type="env", deploy_target="TWILIO_TOKEN", secret="a
 @dag(schedule_interval="@hourly", start_date=datetime(2022, 9, 9), catchup=False)
 def taskflow():
 
-    @virtualenv_task(
+    @task.virtualenv(
         task_id="generate_accessories_dataframe",
         requirements=["bs4", "nordvpn-switcher", "pandas"],
         retries=2
@@ -72,7 +72,7 @@ def taskflow():
         #text = json.dumps(parsed, sort_keys=True, indent=4)
         return exit_criteria
 
-    @branch_task(
+    @task.branch(
         task_id="choose_branch"
     )
     def choose_branch():
@@ -84,7 +84,7 @@ def taskflow():
     def skip():
         pass
 
-    @virtualenv_task(
+    @task.virtualenv(
         task_id="send_text_message",
         requirements=["twilio"],
         retries=2
