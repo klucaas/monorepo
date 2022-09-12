@@ -56,7 +56,7 @@ def taskflow():
             time.sleep(random.randint(1, 30))
             #rotate_VPN(instructions=vpn_setup)
             r = requests.get(BASE_ACCESSORIES_URL + str(page))
-            logging.info(f"Using IP:{r.json()['ip']} for URL:{r.url}")
+            logging.info(f"Using IP:{r.json().get('ip', 'Unknown')} for URL:{r.url}")
             soup = BeautifulSoup(r.content, "html.parser")
             data = soup.findAll(text=True)
             for d in data:
