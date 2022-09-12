@@ -1,5 +1,7 @@
 from airflow.decorators import dag, task, virtualenv_task, branch_task
 from airflow.kubernetes.secret import Secret
+from airflow.operators.empty import EmptyOperator
+from typing import Dict
 from datetime import datetime
 import requests
 import json
@@ -16,9 +18,10 @@ def taskflow():
     @task.virtualenv(
         task_id="check_for_belt_bags",
         requirements=["bs4", "nordvpn-switcher", "pandas"],
-        retries=2
+        retries=2,
+        multiple_outputs=True,
     )
-    def check_for_belt_bags() -> str:
+    def check_for_belt_bags() -> Dict[str, bool]:
         from bs4 import BeautifulSoup
         from collections import Counter
         from nordvpn_switcher import initialize_VPN, rotate_VPN, terminate_VPN
@@ -79,14 +82,12 @@ def taskflow():
     @task.branch(
         task_id="choose_branch"
     )
-    def choose_branch():
-        return 'send_text_message'
+    def choose_branch(result: Dict[str, bool]):
+        if True in result.values():
+            return "send_text_message"
+        return "skip"
 
-    @task.python(
-        task_id="skip"
-    )
-    def skip():
-        pass
+    skip = EmptyOperator(task_id="skip")
 
     @task.virtualenv(
         task_id="send_text_message",
@@ -99,7 +100,7 @@ def taskflow():
         client = Client(TWILIO_ACCOUNT, TWILIO_TOKEN)
         client.messages.create(body="this is a test message", from_="AIRFLOW", to="15195041469")
 
-    check_for_belt_bags() #  >> [send_text_message(), skip]
+    choose_branch(check_for_belt_bags()) >> [send_text_message(), skip]
 
 
 dag = taskflow()
