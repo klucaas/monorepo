@@ -78,6 +78,12 @@ def taskflow():
     def choose_branch():
         return 'send_text_message'
 
+    @task.python(
+        task_id="skip"
+    )
+    def skip():
+        pass
+
     @task.virtualenv(
         task_id="send_text_message",
         requirements=["twilio"],
@@ -89,7 +95,7 @@ def taskflow():
         client = Client(TWILIO_ACCOUNT, TWILIO_TOKEN)
         client.messages.create(body="this is a test message", from_="AIRFLOW", to="15195041469")
 
-    check_for_belt_bags >> choose_branch >> send_text_message
+    check_for_belt_bags >> choose_branch >> [send_text_message, skip]
 
 
 dag = taskflow()
