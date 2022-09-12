@@ -97,5 +97,7 @@ def taskflow():
 
     check_for_belt_bags >> choose_branch >> [send_text_message, skip]
 
+    check_for_belt_bags(choose_branch()) >> [send_text_message(), skip]
+
 
 dag = taskflow()
