@@ -97,13 +97,20 @@ def taskflow():
     def send_text_message():
         from twilio.rest import Client
         from airflow.kubernetes.secret import Secret
-        TWILIO_ACCOUNT = Secret(deploy_type="env", deploy_target="TWILIO_ACCOUNT", secret="airflow-secrets",
-                                key="TWILIO_ACCOUNT")
-        TWILIO_TOKEN = Secret(deploy_type="env", deploy_target="TWILIO_TOKEN", secret="airflow-secrets",
-                              key="TWILIO_TOKEN")
+        TWILIO_ACCOUNT_SID = Secret(deploy_type="env", deploy_target="TWILIO_ACCOUNT_SID", secret="airflow-secrets",
+                                key="TWILIO_ACCOUNT_SID")
+        TWILIO_AUTH_TOKEN = Secret(deploy_type="env", deploy_target="TWILIO_AUTH_TOKEN", secret="airflow-secrets",
+                              key="TWILIO_AUTH_TOKEN")
+        TWILIO_USERNAME = Secret(deploy_type="env", deploy_target="TWILIO_USERNAME", secret="airflow-secrets",
+                                key="TWILIO_USERNAME")
+        TWILIO_PASSWORD = Secret(deploy_type="env", deploy_target="TWILIO_PASSWORD", secret="airflow-secrets",
+                              key="TWILIO_PASSWORD")
 
-        client = Client(TWILIO_ACCOUNT, TWILIO_TOKEN)
-        client.messages.create(body="this is a test message", from_="AIRFLOW", to="15195041469")
+        TEXT_RECIPIENT = Secret(deploy_type="env", deploy_target="TEXT_RECIPIENT", secret="airflow-secrets",
+                              key="TEXT_RECIPIENT")
+
+        client = Client(username=TWILIO_USERNAME, password=TWILIO_AUTH_TOKEN, account_sid=TWILIO_ACCOUNT_SID)
+        client.messages.create(body="this is a test message", from_="AIRFLOW", to=TEXT_RECIPIENT)
 
     choose_branch(check_for_belt_bags()) >> [send_text_message(), skip]
 
