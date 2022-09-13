@@ -1,12 +1,7 @@
 from airflow.decorators import dag, task, virtualenv_task, branch_task
-from airflow.kubernetes.secret import Secret
 from airflow.operators.empty import EmptyOperator
 from typing import Dict
 from datetime import datetime
-import requests
-import json
-import time
-import random
 
 
 @dag(schedule_interval="0 1/2 * * *", start_date=datetime(2022, 9, 9), catchup=False)
@@ -22,6 +17,7 @@ def taskflow():
         from bs4 import BeautifulSoup
         from collections import Counter
         from nordvpn_connect import initialize_vpn, rotate_VPN, close_vpn_connection
+        from airflow.kubernetes.secret import Secret
         import logging
         import requests
         import json
@@ -79,7 +75,7 @@ def taskflow():
             if Counter(exit_criteria.values())[True] == 2:
                 break
 
-
+        close_vpn_connection()
         #text = json.dumps(parsed, sort_keys=True, indent=4)
         return exit_criteria
 
@@ -100,6 +96,7 @@ def taskflow():
     )
     def send_text_message():
         from twilio.rest import Client
+        from airflow.kubernetes.secret import Secret
         TWILIO_ACCOUNT = Secret(deploy_type="env", deploy_target="TWILIO_ACCOUNT", secret="airflow-secrets",
                                 key="TWILIO_ACCOUNT")
         TWILIO_TOKEN = Secret(deploy_type="env", deploy_target="TWILIO_TOKEN", secret="airflow-secrets",
