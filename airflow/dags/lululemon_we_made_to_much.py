@@ -95,6 +95,7 @@ def taskflow():
         retries=2
     )
     def send_text_message():
+        import os
         from twilio.rest import Client
         from airflow.kubernetes.secret import Secret
         TWILIO_ACCOUNT_SID = Secret(deploy_type="env", deploy_target="TWILIO_ACCOUNT_SID", secret="airflow-secrets",
@@ -110,7 +111,7 @@ def taskflow():
                               key="TEXT_RECIPIENT")
 
         client = Client()
-        client.messages.create(body="this is a test message", from_="AIRFLOW", to=TEXT_RECIPIENT)
+        client.messages.create(body="this is a test message", from_="AIRFLOW", to=os.environ["TEXT_RECIPIENT"])
 
     choose_branch(check_for_belt_bags()) >> [send_text_message(), skip]
 
