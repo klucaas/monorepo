@@ -109,7 +109,7 @@ def taskflow():
         TEXT_RECIPIENT = Secret(deploy_type="env", deploy_target="TEXT_RECIPIENT", secret="airflow-secrets",
                               key="TEXT_RECIPIENT")
 
-        client = Client(username=TWILIO_USERNAME, password=TWILIO_AUTH_TOKEN, account_sid=TWILIO_ACCOUNT_SID)
+        client = Client()
         client.messages.create(body="this is a test message", from_="AIRFLOW", to=TEXT_RECIPIENT)
 
     choose_branch(check_for_belt_bags()) >> [send_text_message(), skip]
