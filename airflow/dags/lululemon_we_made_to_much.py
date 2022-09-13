@@ -8,11 +8,8 @@ import json
 import time
 import random
 
-TWILIO_ACCOUNT = Secret(deploy_type="env", deploy_target="TWILIO_ACCOUNT", secret="airflow-secrets", key="TWILIO_ACCOUNT")
-TWILIO_TOKEN = Secret(deploy_type="env", deploy_target="TWILIO_TOKEN", secret="airflow-secrets", key="TWILIO_TOKEN")
 
-
-@dag(schedule_interval="@hourly", start_date=datetime(2022, 9, 9), catchup=False)
+@dag(schedule_interval="0 1/2 * * *", start_date=datetime(2022, 9, 9), catchup=False)
 def taskflow():
 
     @task.virtualenv(
@@ -24,14 +21,17 @@ def taskflow():
     def check_for_belt_bags():
         from bs4 import BeautifulSoup
         from collections import Counter
-        from typing import Dict
-        from nordvpn_switcher import initialize_VPN, rotate_VPN, terminate_VPN
+        from nordvpn_connect import initialize_vpn, rotate_VPN, close_vpn_connection
         import logging
         import requests
         import json
         import time
         import random
-        from pandas import DataFrame
+
+
+        NORD_USER = Secret(deploy_type="env", deploy_target="NORD_USER", secret="airflow-secrets", key="NORD_USER")
+        NORD_PASSWORD = Secret(deploy_type="env", deploy_target="NORD_PASSWORD", secret="airflow-secrets",
+                               key="NORD_PASSWORD")
 
         MINI_BELT_BAG = "Mini Belt Bag"
         EVERYWHERE_BELT_BAG = "Everywhere Belt Bag"
@@ -39,7 +39,8 @@ def taskflow():
 
         exit_criteria = {MINI_BELT_BAG: None, EVERYWHERE_BELT_BAG: None}
 
-        #vpn_setup = initialize_VPN(area_input=["Canada", "United States"])
+        vpn_setup = initialize_vpn("United States", NORD_USER, NORD_PASSWORD)
+        rotate_VPN(vpn_setup)
 
         r = requests.get(BASE_ACCESSORIES_URL)
         #logging.info(f"Using IP:{r.json()['ip']}")
@@ -69,9 +70,11 @@ def taskflow():
 
             if MINI_BELT_BAG in string:
                 exit_criteria[MINI_BELT_BAG] = True
+                logging.info(f"Found {MINI_BELT_BAG} on {BASE_ACCESSORIES_URL + str(page)}")
 
             if EVERYWHERE_BELT_BAG in string:
                 exit_criteria[EVERYWHERE_BELT_BAG] = True
+                logging.info(f"Found {EVERYWHERE_BELT_BAG} on {BASE_ACCESSORIES_URL + str(page)}")
 
             if Counter(exit_criteria.values())[True] == 2:
                 break
@@ -97,6 +100,10 @@ def taskflow():
     )
     def send_text_message():
         from twilio.rest import Client
+        TWILIO_ACCOUNT = Secret(deploy_type="env", deploy_target="TWILIO_ACCOUNT", secret="airflow-secrets",
+                                key="TWILIO_ACCOUNT")
+        TWILIO_TOKEN = Secret(deploy_type="env", deploy_target="TWILIO_TOKEN", secret="airflow-secrets",
+                              key="TWILIO_TOKEN")
 
         client = Client(TWILIO_ACCOUNT, TWILIO_TOKEN)
         client.messages.create(body="this is a test message", from_="AIRFLOW", to="15195041469")
