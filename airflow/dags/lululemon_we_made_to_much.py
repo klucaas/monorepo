@@ -38,8 +38,10 @@ def taskflow():
         vpn_setup = initialize_vpn("United States", NORD_USER, NORD_PASSWORD)
         rotate_VPN(vpn_setup)
 
-        r = requests.get(BASE_ACCESSORIES_URL)
-        #logging.info(f"Using IP:{r.json()['ip']}")
+        r = requests.get(BASE_ACCESSORIES_URL, stream=True)
+        server_ip, server_port = r.raw._connection.sock.getpeername()
+        external_ip = requests.get('https://checkip.amazonaws.com').text.strip()
+        logging.info(f"Using Server IP:{server_ip}:{server_port} and External IP:{external_ip} for URL:{r.url}")
 
         soup = BeautifulSoup(r.content, "html.parser")
         data = soup.findAll(text=True)
@@ -55,9 +57,11 @@ def taskflow():
 
         for page in range(1, last_page + 1):
             time.sleep(random.randint(1, 30))
-            #rotate_VPN(instructions=vpn_setup)
-            r = requests.get(BASE_ACCESSORIES_URL + str(page))
-            logging.info(f"Using IP:{r.json().get('ip', 'Unknown')} for URL:{r.url}")
+
+            r = requests.get(BASE_ACCESSORIES_URL + str(page), stream=True)
+            server_ip, server_port = r.raw._connection.sock.getpeername()
+            external_ip = requests.get('https://checkip.amazonaws.com').text.strip()
+            logging.info(f"Using Server IP:{server_ip}:{server_port} and External IP:{external_ip} for URL:{r.url}")
             soup = BeautifulSoup(r.content, "html.parser")
             data = soup.findAll(text=True)
             for d in data:
