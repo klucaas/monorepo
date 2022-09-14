@@ -9,13 +9,12 @@ def taskflow():
 
     @task.virtualenv(
         task_id="check_for_belt_bags",
-        requirements=["bs4", "nordvpn-connect==0.0.7", "pandas", "requests>=2.26.0", "urllib3>=1.26.0"],
+        requirements=["bs4", "requests[socks]"],
         retries=2,
     )
     def check_for_belt_bags():
         from bs4 import BeautifulSoup
         from collections import Counter
-        from nordvpn_connect import initialize_vpn, rotate_VPN, close_vpn_connection
         from airflow.kubernetes.secret import Secret
         import logging
         import requests
@@ -35,25 +34,37 @@ def taskflow():
 
         exit_criteria = {MINI_BELT_BAG: None, EVERYWHERE_BELT_BAG: None}
 
-        os.system(
-            "wget https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/nordvpn-release_1.0.0_all.deb"
-            " && "
-            "sudo apt-get install nordvpn-release_1.0.0_all.deb"
-        )
+        def make_request(next_page: str) -> bytes:
 
-        vpn_setup = initialize_vpn("United States", NORD_USER, NORD_PASSWORD)
-        rotate_VPN(vpn_setup)
+            socks = [
+                "los-angeles.us.socks.nordhold.net",
+                "amsterdam.nl.socks.nordhold.net",
+                "atlanta.us.socks.nordhold.net",
+                "dallas.us.socks.nordhold.net",
+                "dublin.ie.socks.nordhold.net",
+                "ie.socks.nordhold.net",
+                "nl.socks.nordhold.net",
+                "se.socks.nordhold.net",
+                "stockholm.se.socks.nordhold.net",
+                "us.socks.nordhold.net",
+            ]
 
-        r = requests.get(BASE_ACCESSORIES_URL, stream=True)
-        server_ip, server_port = r.raw._connection.sock.getpeername()
-        external_ip = requests.get('https://checkip.amazonaws.com').text.strip()
-        logging.info(f"Using Server IP:{server_ip}:{server_port} and External IP:{external_ip} for URL:{r.url}")
+            r = requests.get(
+                BASE_ACCESSORIES_URL + str(next_page),
+                proxies={
+                    "https": f"socks5://"
+                             f"{os.environ['NORD_USER']}:{os.environ['NORD_PASSWORD']}{random.choice(socks)}@:1080"
+                }
+            )
+            # server_ip, server_port = r.raw._connection.sock.getpeername()
 
-        soup = BeautifulSoup(r.content, "html.parser")
-        data = soup.findAll(text=True)
+            logging.info(f"{r.raw._connection.sock.getpeername()}")
+            logging.info(f"Using IP:{r.json().get('ip', 'Unknown')} and for URL:{r.url}")
+
+            return r.content
 
         string = ""
-        for d in data:
+        for d in BeautifulSoup(make_request(str(1)), "html.parser").findAll(text=True):
             str(d)
             string += d
 
@@ -64,13 +75,7 @@ def taskflow():
         for page in range(1, last_page + 1):
             time.sleep(random.randint(1, 30))
 
-            r = requests.get(BASE_ACCESSORIES_URL + str(page), stream=True)
-            server_ip, server_port = r.raw._connection.sock.getpeername()
-            external_ip = requests.get('https://checkip.amazonaws.com').text.strip()
-            logging.info(f"Using Server IP:{server_ip}:{server_port} and External IP:{external_ip} for URL:{r.url}")
-            soup = BeautifulSoup(r.content, "html.parser")
-            data = soup.findAll(text=True)
-            for d in data:
+            for d in BeautifulSoup(make_request(str(page)), "html.parser").findAll(text=True):
                 str(d)
                 string += d
 
@@ -85,7 +90,6 @@ def taskflow():
             if Counter(exit_criteria.values())[True] == 2:
                 break
 
-        close_vpn_connection()
         #text = json.dumps(parsed, sort_keys=True, indent=4)
         return exit_criteria
 
