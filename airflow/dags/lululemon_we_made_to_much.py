@@ -9,7 +9,7 @@ def taskflow():
 
     @task.virtualenv(
         task_id="check_for_belt_bags",
-        requirements=["bs4", "nordvpn-switcher", "pandas"],
+        requirements=["bs4", "nordvpn-connect", "pandas"],
         retries=2,
     )
     def check_for_belt_bags():
