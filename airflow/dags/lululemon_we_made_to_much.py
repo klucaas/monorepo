@@ -95,11 +95,10 @@ def taskflow():
     @task.virtualenv(
         task_id="send_text_message",
         requirements=["twilio"],
+        op_kwargs={"values": "{{ ti.xcom_pull(task_ids='check_for_belt_bags'}}"},
         retries=2,
-        provide_context=True,
-        op_kwargs={"values": "{{ ti.xcom_pull(task_ids='check_for_belt_bags'}}"}
     )
-    def send_text_message(values):
+    def send_text_message(values, **context):
         import os
         import logging
         from twilio.rest import Client
@@ -114,9 +113,7 @@ def taskflow():
         TWILIO_NUMBER = Secret(deploy_type="env", deploy_target="TWILIO_NUMBER", secret="airflow-secrets",
                                  key="TWILIO_NUMBER")
 
-
         logging.info(f"{values}")
-
 
         client = Client()
         client.messages.create(body="this is a test message", from_=os.environ["TWILIO_NUMBER"], to=os.environ["TEXT_RECIPIENT"])
