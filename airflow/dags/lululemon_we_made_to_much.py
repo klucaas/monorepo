@@ -96,6 +96,7 @@ def taskflow():
         task_id="send_text_message",
         requirements=["twilio"],
         values="{{ ti.xcom_pull(task_ids='check_for_belt_bags'}}",
+        provide_context=True,
         retries=2,
     )
     def send_text_message(values, **context):
