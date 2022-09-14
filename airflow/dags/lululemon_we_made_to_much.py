@@ -11,7 +11,6 @@ def taskflow():
         task_id="check_for_belt_bags",
         requirements=["bs4", "nordvpn-switcher", "pandas"],
         retries=2,
-        multiple_outputs=True,
     )
     def check_for_belt_bags():
         from bs4 import BeautifulSoup
@@ -96,9 +95,10 @@ def taskflow():
     @task.virtualenv(
         task_id="send_text_message",
         requirements=["twilio"],
-        retries=2
+        retries=2,
+        op_kwargs={"values": "{{ ti.xcom_pull(task_ids=\"check_for_belt_bags\"}}"}
     )
-    def send_text_message(**context):
+    def send_text_message(values):
         import os
         import logging
         from twilio.rest import Client
@@ -114,9 +114,7 @@ def taskflow():
                                  key="TWILIO_NUMBER")
 
 
-        logging.info(f"{context}")
-        rv = context["task_instance"].xcom_pull(task_ids="check_for_belt_bags")
-        logging.info(f"this is rv:{rv}")
+        logging.info(f"{values}")
 
         client = Client()
         client.messages.create(body="this is a test message", from_=os.environ["TWILIO_NUMBER"], to=os.environ["TEXT_RECIPIENT"])
