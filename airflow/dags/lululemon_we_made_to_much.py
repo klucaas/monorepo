@@ -22,6 +22,7 @@ def taskflow():
         import json
         import time
         import random
+        import os
 
 
         NORD_USER = Secret(deploy_type="env", deploy_target="NORD_USER", secret="airflow-secrets", key="NORD_USER")
@@ -33,6 +34,8 @@ def taskflow():
         BASE_ACCESSORIES_URL = "https://shop.lululemon.com/api/c/accessories?page="
 
         exit_criteria = {MINI_BELT_BAG: None, EVERYWHERE_BELT_BAG: None}
+
+        os.system("sh <(wget -qO - https://downloads.nordcdn.com/apps/linux/install.sh)")
 
         vpn_setup = initialize_vpn("United States", NORD_USER, NORD_PASSWORD)
         rotate_VPN(vpn_setup)
