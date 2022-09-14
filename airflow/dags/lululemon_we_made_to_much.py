@@ -95,7 +95,7 @@ def taskflow():
     @task.virtualenv(
         task_id="send_text_message",
         requirements=["twilio"],
-        op_kwargs={"values": "{{ ti.xcom_pull(task_ids='check_for_belt_bags'}}"},
+        values="{{ ti.xcom_pull(task_ids='check_for_belt_bags'}}",
         retries=2,
     )
     def send_text_message(values, **context):
