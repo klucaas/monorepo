@@ -98,23 +98,25 @@ def taskflow():
         requirements=["twilio"],
         retries=2
     )
-    def send_text_message():
+    def send_text_message(**context):
         import os
+        import logging
         from twilio.rest import Client
         from airflow.kubernetes.secret import Secret
         TWILIO_ACCOUNT_SID = Secret(deploy_type="env", deploy_target="TWILIO_ACCOUNT_SID", secret="airflow-secrets",
                                 key="TWILIO_ACCOUNT_SID")
         TWILIO_AUTH_TOKEN = Secret(deploy_type="env", deploy_target="TWILIO_AUTH_TOKEN", secret="airflow-secrets",
                               key="TWILIO_AUTH_TOKEN")
-        TWILIO_USERNAME = Secret(deploy_type="env", deploy_target="TWILIO_USERNAME", secret="airflow-secrets",
-                                key="TWILIO_USERNAME")
-        TWILIO_PASSWORD = Secret(deploy_type="env", deploy_target="TWILIO_PASSWORD", secret="airflow-secrets",
-                              key="TWILIO_PASSWORD")
 
         TEXT_RECIPIENT = Secret(deploy_type="env", deploy_target="TEXT_RECIPIENT", secret="airflow-secrets",
                               key="TEXT_RECIPIENT")
         TWILIO_NUMBER = Secret(deploy_type="env", deploy_target="TWILIO_NUMBER", secret="airflow-secrets",
                                  key="TWILIO_NUMBER")
+
+
+        logging.info(f"{context}")
+        rv = context["task_instance"].xcom_pull(task_ids="check_for_belt_bags")
+        logging.info(f"this is rv:{rv}")
 
         client = Client()
         client.messages.create(body="this is a test message", from_=os.environ["TWILIO_NUMBER"], to=os.environ["TEXT_RECIPIENT"])
