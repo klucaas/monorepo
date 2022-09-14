@@ -9,7 +9,7 @@ def taskflow():
 
     @task.virtualenv(
         task_id="check_for_belt_bags",
-        requirements=["bs4", "nordvpn-connect", "pandas"],
+        requirements=["bs4", "nordvpn-connect", "pandas", "requests>=2.26.0", "urllib3>=1.26.0"],
         retries=2,
     )
     def check_for_belt_bags():
@@ -35,7 +35,11 @@ def taskflow():
 
         exit_criteria = {MINI_BELT_BAG: None, EVERYWHERE_BELT_BAG: None}
 
-        os.system("sh <(wget -qO - https://downloads.nordcdn.com/apps/linux/install.sh)")
+        os.system(
+            "wget https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/nordvpn-release_1.0.0_all.deb"
+            " && "
+            "sudo apt-get install nordvpn-release_1.0.0_all.deb"
+        )
 
         vpn_setup = initialize_vpn("United States", NORD_USER, NORD_PASSWORD)
         rotate_VPN(vpn_setup)
