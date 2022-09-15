@@ -113,7 +113,7 @@ def taskflow():
         requirements=["twilio"],
         retries=2,
     )
-    def send_text_message(exit_criteria=check_for_belt_bags.output):
+    def send_text_message(exit_criteria=check_for_belt_bags().output):
         import os
         import logging
         from twilio.rest import Client
