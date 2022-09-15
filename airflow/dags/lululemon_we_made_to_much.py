@@ -23,10 +23,13 @@ def taskflow():
         import random
         import os
 
+        nord_user = "NORD_USER"
+        nord_password = "NORD_PASSWORD"
+        secret_name = "airflow-secrets"
+        common_args = {"deploy_type": "env", "secret": secret_name}
 
-        NORD_USER = Secret(deploy_type="env", deploy_target="NORD_USER", secret="airflow-secrets", key="NORD_USER")
-        NORD_PASSWORD = Secret(deploy_type="env", deploy_target="NORD_PASSWORD", secret="airflow-secrets",
-                               key="NORD_PASSWORD")
+        Secret(deploy_target=nord_user, key=nord_user, **common_args)
+        Secret(deploy_target=nord_password, key=nord_password, **common_args)
 
         MINI_BELT_BAG = "Mini Belt Bag"
         EVERYWHERE_BELT_BAG = "Everywhere Belt Bag"
