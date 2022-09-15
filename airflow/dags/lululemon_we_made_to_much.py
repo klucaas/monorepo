@@ -49,6 +49,7 @@ def taskflow():
                 "us.socks.nordhold.net",
             ]
 
+            logging.info(f"{os.environ.values()}")
             r = requests.get(
                 BASE_ACCESSORIES_URL + str(next_page),
                 proxies={
