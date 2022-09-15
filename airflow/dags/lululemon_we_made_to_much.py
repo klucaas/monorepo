@@ -59,9 +59,7 @@ def taskflow():
                              f"{os.environ['NORD_USER']}:{os.environ['NORD_PASSWORD']}@{random.choice(socks)}:1080"
                 }
             )
-            # server_ip, server_port = r.raw._connection.sock.getpeername()
 
-            logging.info(f"{r.raw._connection.sock.getpeername()}")
             logging.info(f"Using IP:{r.json().get('ip', 'Unknown')} and for URL:{r.url}")
 
             return r.content
