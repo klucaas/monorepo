@@ -112,11 +112,9 @@ def taskflow():
         task_id="send_text_message",
         requirements=["twilio"],
         retries=2,
-        op_kwargs={
-            "return_value": "{{ ti.xcom_pull(task_ids='check_for_belt_bags') }}"
-        },
+        return_value="{{ ti.xcom_pull(task_ids='check_for_belt_bags') }}"
     )
-    def send_text_message(return_value, **kwargs):
+    def send_text_message(**kwargs):
         import os
         import logging
         from twilio.rest import Client
@@ -133,7 +131,7 @@ def taskflow():
                                  key="TWILIO_NUMBER")
 
         logging.info(f"{kwargs}")
-        logging.info(f"{return_value}")
+        logging.info(f"{kwargs.get('return_value', 'NOPE')}")
 
         client = Client()
         client.messages.create(body="this is a test message", from_=os.environ["TWILIO_NUMBER"], to=os.environ["TEXT_RECIPIENT"])
