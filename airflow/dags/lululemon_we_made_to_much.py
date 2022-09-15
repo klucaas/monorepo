@@ -11,7 +11,6 @@ def taskflow():
         task_id="check_for_belt_bags",
         requirements=["bs4", "requests[socks]"],
         retries=2,
-        system_site_packages=False,
     )
     def check_for_belt_bags():
         from bs4 import BeautifulSoup
@@ -113,7 +112,6 @@ def taskflow():
         task_id="send_text_message",
         requirements=["twilio"],
         retries=2,
-        system_site_packages=False,
     )
     def send_text_message(exit_criteria):
         import os
