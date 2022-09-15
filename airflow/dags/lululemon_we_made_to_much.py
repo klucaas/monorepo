@@ -65,7 +65,8 @@ def taskflow():
             return r.content
 
         string = ""
-        for d in BeautifulSoup(make_request(str(1)), "html.parser").findAll(text=True):
+        first_page = 1
+        for d in BeautifulSoup(make_request(str(first_page)), "html.parser").findAll(text=True):
             str(d)
             string += d
 
@@ -73,7 +74,7 @@ def taskflow():
 
         last_page = int(parsed["links"]["last"].split("=")[1])
 
-        for page in range(1, last_page + 1):
+        for page in range(first_page + 1, last_page + 1):
             time.sleep(random.randint(1, 30))
 
             for d in BeautifulSoup(make_request(str(page)), "html.parser").findAll(text=True):
