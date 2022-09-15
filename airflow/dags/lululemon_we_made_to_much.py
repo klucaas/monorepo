@@ -98,6 +98,7 @@ def taskflow():
         #text = json.dumps(parsed, sort_keys=True, indent=4)
         return exit_criteria
 
+    check_belt_bags = check_for_belt_bags()
     @task.branch(
         task_id="choose_branch"
     )
@@ -113,7 +114,7 @@ def taskflow():
         requirements=["twilio"],
         retries=2,
     )
-    def send_text_message(exit_criteria=check_for_belt_bags):
+    def send_text_message(exit_criteria=check_belt_bags):
         import os
         import logging
         from twilio.rest import Client
@@ -134,7 +135,7 @@ def taskflow():
         client = Client()
         client.messages.create(body="this is a test message", from_=os.environ["TWILIO_NUMBER"], to=os.environ["TEXT_RECIPIENT"])
 
-    choose_branch(check_for_belt_bags()) >> [send_text_message(), skip]
+    choose_branch(check_belt_bags) >> [send_text_message(), skip]
 
 
 dag = taskflow()
