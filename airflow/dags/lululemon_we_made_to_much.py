@@ -54,6 +54,7 @@ def taskflow():
 
             r = requests.get(
                 BASE_ACCESSORIES_URL + str(next_page),
+                headers={"Connection": "close"},
                 proxies={
                     "https": f"socks5h://"
                              f"{os.environ['NORD_USER']}:{os.environ['NORD_PASSWORD']}@{random.choice(socks)}:1080"
@@ -61,6 +62,7 @@ def taskflow():
             )
 
             logging.info(f"Using IP:{r.json().get('ip', 'Unknown')} and for URL:{r.url}")
+            time.sleep(random.randint(1, 30))
 
             return r.content
 
@@ -75,7 +77,6 @@ def taskflow():
         last_page = int(parsed["links"]["last"].split("=")[1])
 
         for page in range(first_page + 1, last_page + 1):
-            time.sleep(random.randint(1, 30))
 
             for d in BeautifulSoup(make_request(str(page)), "html.parser").findAll(text=True):
                 str(d)
