@@ -52,12 +52,11 @@ def taskflow():
                 "us.socks.nordhold.net",
             ]
 
-            logging.info(f"{os.environ.values()}")
             r = requests.get(
                 BASE_ACCESSORIES_URL + str(next_page),
                 proxies={
                     "https": f"socks5://"
-                             f"{os.environ['NORD_USER']}:{os.environ['NORD_PASSWORD']}{random.choice(socks)}@:1080"
+                             f"{os.environ['NORD_USER']}:{os.environ['NORD_PASSWORD']}@{random.choice(socks)}:1080"
                 }
             )
             # server_ip, server_port = r.raw._connection.sock.getpeername()
