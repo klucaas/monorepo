@@ -74,6 +74,8 @@ def taskflow():
 
         parsed = json.loads(string)
 
+        logging.info(parsed)
+
         last_page = int(parsed["links"]["last"].split("=")[1])
 
         for page in range(first_page + 1, last_page + 1):
@@ -110,8 +112,11 @@ def taskflow():
         task_id="send_text_message",
         requirements=["twilio"],
         retries=2,
+        op_kwargs={
+            "return_value": "{{ ti.xcom_pull(task_ids='check_for_belt_bags') }}"
+        },
     )
-    def send_text_message(**kwargs):
+    def send_text_message(return_value, **kwargs):
         import os
         import logging
         from twilio.rest import Client
@@ -127,7 +132,8 @@ def taskflow():
         TWILIO_NUMBER = Secret(deploy_type="env", deploy_target="TWILIO_NUMBER", secret="airflow-secrets",
                                  key="TWILIO_NUMBER")
 
-        logging.info(f"{kwargs['ti'].xcom_pull(task_ids='check_for_belt_bags')}")
+        logging.info(f"{kwargs}")
+        logging.info(f"{return_value}")
 
         client = Client()
         client.messages.create(body="this is a test message", from_=os.environ["TWILIO_NUMBER"], to=os.environ["TEXT_RECIPIENT"])
