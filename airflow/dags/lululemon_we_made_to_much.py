@@ -113,7 +113,7 @@ def taskflow():
         requirements=["twilio"],
         retries=2,
     )
-    def send_text_message(**kwargs):
+    def send_text_message(exit_criteria="{{ ti.xcom_pull(task_ids='check_for_belt_bags', key='return_value') }}"):
         import os
         import logging
         from twilio.rest import Client
@@ -129,7 +129,7 @@ def taskflow():
         TWILIO_NUMBER = Secret(deploy_type="env", deploy_target="TWILIO_NUMBER", secret="airflow-secrets",
                                  key="TWILIO_NUMBER")
 
-        logging.info(f"{str(kwargs['return_value'])}")
+        logging.info(f"{exit_criteria}")
 
         client = Client()
         client.messages.create(body="this is a test message", from_=os.environ["TWILIO_NUMBER"], to=os.environ["TEXT_RECIPIENT"])
