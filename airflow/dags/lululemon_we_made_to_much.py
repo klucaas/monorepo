@@ -11,6 +11,7 @@ def taskflow():
         task_id="check_for_belt_bags",
         requirements=["bs4", "requests[socks]"],
         retries=2,
+        system_site_packages=False,
     )
     def check_for_belt_bags():
         from bs4 import BeautifulSoup
@@ -112,8 +113,9 @@ def taskflow():
         task_id="send_text_message",
         requirements=["twilio"],
         retries=2,
+        system_site_packages=False,
     )
-    def send_text_message(exit_criteria="{{ ti.xcom_pull(task_ids='check_for_belt_bags', key='return_value') }}"):
+    def send_text_message(exit_criteria):
         import os
         import logging
         from twilio.rest import Client
@@ -134,7 +136,7 @@ def taskflow():
         client = Client()
         client.messages.create(body="this is a test message", from_=os.environ["TWILIO_NUMBER"], to=os.environ["TEXT_RECIPIENT"])
 
-    choose_branch(check_for_belt_bags()) >> [send_text_message(), skip]
+    choose_branch(check_for_belt_bags()) >> [send_text_message(exit_criteria="{{ ti.xcom_pull(task_ids='check_for_belt_bags', key='return_value') }}"), skip]
 
 
 dag = taskflow()
