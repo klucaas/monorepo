@@ -45,8 +45,6 @@ def taskflow():
                 "amsterdam.nl.socks.nordhold.net",
                 "atlanta.us.socks.nordhold.net",
                 "dallas.us.socks.nordhold.net",
-                "dublin.ie.socks.nordhold.net",
-                "ie.socks.nordhold.net",
                 "nl.socks.nordhold.net",
                 "se.socks.nordhold.net",
                 "stockholm.se.socks.nordhold.net",
