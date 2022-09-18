@@ -9,13 +9,14 @@ def taskflow():
 
     @task.virtualenv(
         task_id="check_for_belt_bags",
-        requirements=["bs4", "requests[socks]"],
+        requirements=["bs4", "requests[socks]", "pysocks"],
         retries=2,
     )
     def check_for_belt_bags():
         from bs4 import BeautifulSoup
         from collections import Counter
         from airflow.kubernetes.secret import Secret
+        from socks import GeneralProxyError
         import logging
         import requests
         import json
@@ -51,19 +52,21 @@ def taskflow():
                 "stockholm.se.socks.nordhold.net",
                 "us.socks.nordhold.net",
             ]
-
-            r = requests.get(
-                BASE_ACCESSORIES_URL + str(next_page),
-                headers={"Connection": "close"},
-                proxies={
-                    "https": f"socks5h://"
-                             f"{os.environ['NORD_USER']}:{os.environ['NORD_PASSWORD']}@{random.choice(socks)}:1080"
-                }
-            )
-
-            logging.info(f"Using IP:{r.json().get('ip', 'Unknown')} and for URL:{r.url}")
-            time.sleep(random.randint(1, 30))
-
+            try:
+                r = requests.get(
+                    BASE_ACCESSORIES_URL + str(next_page),
+                    headers={"Connection": "close"},
+                    proxies={
+                        "https": f"socks5h://"
+                                 f"{os.environ['NORD_USER']}:{os.environ['NORD_PASSWORD']}@{random.choice(socks)}:1080"
+                    }
+                )
+                logging.info(f"{str(requests.utils.get_proxies())}")
+                logging.info(f"Using IP:{r.json().get('ip', 'Unknown')} and for URL:{r.url}")
+                time.sleep(random.randint(1, 30))
+            except GeneralProxyError as e:
+                logging.info(f"{e}")
+                make_request(next_page)
             return r.content
 
         string = ""
@@ -132,7 +135,7 @@ def taskflow():
         logging.info(f"{exit_criteria}")
 
         client = Client()
-        client.messages.create(body="this is a test message", from_=os.environ["TWILIO_NUMBER"], to=os.environ["TEXT_RECIPIENT"])
+        #client.messages.create(body="this is a test message", from_=os.environ["TWILIO_NUMBER"], to=os.environ["TEXT_RECIPIENT"])
 
     choose_branch(check_for_belt_bags()) >> [send_text_message(exit_criteria="{{ ti.xcom_pull(task_ids='check_for_belt_bags', key='return_value') }}"), skip]
 
