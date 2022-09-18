@@ -38,7 +38,7 @@ def taskflow():
 
         exit_criteria = {MINI_BELT_BAG: None, EVERYWHERE_BELT_BAG: None}
 
-        def make_request(next_page: str) -> bytes:
+        def make_request(next_page: str, retries=0) -> bytes:
 
             socks = [
                 "los-angeles.us.socks.nordhold.net",
@@ -50,20 +50,25 @@ def taskflow():
                 "stockholm.se.socks.nordhold.net",
                 "us.socks.nordhold.net",
             ]
+            random_socks = random.choice(socks)
+            logging.info(f"Using {random_socks}")
             try:
+                url = BASE_ACCESSORIES_URL + str(next_page)
                 r = requests.get(
-                    BASE_ACCESSORIES_URL + str(next_page),
+                    url,
                     headers={"Connection": "close"},
                     proxies={
                         "https": f"socks5h://"
-                                 f"{os.environ['NORD_USER']}:{os.environ['NORD_PASSWORD']}@{random.choice(socks)}:1080"
+                                 f"{os.environ['NORD_USER']}:{os.environ['NORD_PASSWORD']}@{random_socks}:1080"
                     }
                 )
                 logging.info(f"{str(requests.utils.getproxies())}")
                 logging.info(f"Using IP:{r.json().get('ip', 'Unknown')} and for URL:{r.url}")
                 time.sleep(random.randint(1, 30))
-            except GeneralProxyError as e:
-                logging.info(f"THIS IS AN ERROR MESSAGE: {e}")
+            except Exception as e:
+                logging.info(f"THIS IS EXCEPTION:  {e}")
+                logging.info(f"RETRYING: {url}")
+                make_request(next_page, retries=retries+1)
 
             return r.content
 
