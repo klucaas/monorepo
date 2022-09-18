@@ -61,7 +61,7 @@ def taskflow():
                                  f"{os.environ['NORD_USER']}:{os.environ['NORD_PASSWORD']}@{random.choice(socks)}:1080"
                     }
                 )
-                logging.info(f"{str(requests.utils.get_proxies())}")
+                logging.info(f"{str(requests.utils.getproxies())}")
                 logging.info(f"Using IP:{r.json().get('ip', 'Unknown')} and for URL:{r.url}")
                 time.sleep(random.randint(1, 30))
             except GeneralProxyError as e:
