@@ -63,8 +63,8 @@ def taskflow():
                 logging.info(f"Using IP:{r.json().get('ip', 'Unknown')} and for URL:{r.url}")
                 time.sleep(random.randint(1, 30))
             except GeneralProxyError as e:
-                logging.info(f"{e}")
-                make_request(next_page)
+                logging.info(f"THIS IS AN ERROR MESSAGE: {e}")
+
             return r.content
 
         string = ""
