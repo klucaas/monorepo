@@ -9,8 +9,7 @@ from airflow.decorators import dag, task
 from datetime import datetime
 from selenium.webdriver.common.by import By
 from airflow.providers.google.cloud.hooks.gcs import GCSHook
-from logging import log
-from ..common.selenium import get_page_source, create_driver, click_elements
+from dags.common.selenium import get_page_source, create_driver, click_elements
 from nordvpn_switcher import initialize_VPN, rotate_VPN, terminate_VPN
 import time
 import random
@@ -38,8 +37,6 @@ def scrape():
 
     @task
     def request():
-
-
         captured_html = {}
         current_page = 1
         listings_class_name = "listings"

@@ -15,6 +15,7 @@ def create_driver():
 def quit_driver(driver):
     driver.quit()
 
+
 def get_page_source(driver: webdriver, url: str, class_name: str):
     driver.get(url)
     WebDriverWait(
